@@ -1,69 +1,79 @@
-// Script for Rock Paper Scissor game
+// Game Code
 const weapon = ["Rock", "Paper", "Scissors"];
 
-// Randomly selects R P or S
-function computerPlay () {
-    return weapon[Math.floor(Math.random() * weapon.length)];
-}
+let winCount = 0;
+let loseCount = 0;
+let roundResult = "";
 
-// Returns winning result
 function playRound(playerSelection, computerSelection) {
-    if (weapon.includes(playerSelection) == false) {
-        return "error";
-    }
-    else if (playerSelection === computerSelection) {
-        return "tie";
+    if (playerSelection === computerSelection) {
+        roundResult = "tie";
     }
     else if ((playerSelection === 'Rock' && computerSelection === 'Paper') 
             || (playerSelection === 'Paper' && computerSelection === 'Scissors')
             || (playerSelection === 'Scissors' && computerSelection === 'Rock')) {
-        return "lose";
+        roundResult = "lose";
+        loseCount++;
     }
-    else {
-        return "win";
+    else if ((playerSelection === 'Rock' && computerSelection === 'Scissors') 
+    || (playerSelection === 'Paper' && computerSelection === 'Rock')
+    || (playerSelection === 'Scissors' && computerSelection === 'Paper')){
+        roundResult = "win";
+        winCount++;
     }
+
+    updateScore(roundResult, winCount, loseCount, playerSelection, computerSelection);
 }
 
-// Function runs 5 games
-function game() {
-    let i = 0;
-    let winCount = 0;
-    let loseCount = 0;
-    while (i < 5) {
-        const input = prompt("Choose your weapon!");
-        const playerSelection = input.substr(0,1).toUpperCase() + input.substr(1).toLowerCase();
-        const computerSelection = computerPlay();
-
-        result = playRound(playerSelection, computerSelection);
-
-        if (result === "error") {
-            console.log(`Invalid input. Please try again.`);
-        }
-        else if (result === "tie") {
-            console.log(`It's a tie! You both played ${playerSelection}.`);
-            i++;
-        }
-        else if (result === "lose") {
-            console.log(`You lose! ${computerSelection} beats ${playerSelection}!`);
-            i++;
-            loseCount++;
-        }
-        else {
-            console.log(`You win! ${playerSelection} beats ${computerSelection}!`);
-            i++;
-            winCount++;
-        }
-        console.log(`Score: ${winCount} - ${loseCount}.`);
-    }
-    if (winCount > loseCount) {
-        console.log('You won!');
-    }
-    else if (winCount < loseCount) {
-        console.log('You lost!');
-    }
-    else {
-        console.log('You tied!');
-    }
+function computerPlay () {
+    return weapon[Math.floor(Math.random() * weapon.length)];
 }
 
 
+// UI
+const buttons = document.querySelectorAll('button');
+buttons.forEach((button) => {
+    button.addEventListener('click', () => {
+        onClick(button.id);
+    });
+});
+
+const roundInfo = document.getElementById('round-info');
+const playerScore = document.getElementById('player-score');
+const computerScore = document.getElementById('computer-score');
+
+function onClick(playerSelection) {
+    const computerSelection = computerPlay();
+    playRound(playerSelection, computerSelection);
+  
+    if (winCount === 5 || loseCount === 5) {
+        gameOver((winCount > loseCount));
+        return
+    }
+}
+
+function updateScore (roundResult, winCount, loseCount, playerSelection, computerSelection) {
+    if (roundResult === "tie") {
+        roundInfo.textContent = `It's a tie! You both played ${playerSelection}.`;
+    }
+    else if (roundResult === "lose") {
+        roundInfo.textContent = `You lose! ${computerSelection} beats ${playerSelection}!`;
+    }
+    else if (roundResult === "win") {
+        roundInfo.textContent = `You win! ${playerSelection} beats ${computerSelection}!`;
+    }
+
+    playerScore.textContent = `You: ${winCount}`;
+    computerScore.textContent = `Computer: ${loseCount}`;
+}
+
+function gameOver (win) {
+    if (win) {
+        roundInfo.textContent = 'Game over - YOU WIN!';
+    }
+    else {
+        roundInfo.textContent = 'Game over - YOU LOSE!';
+    }
+    winCount = 0;
+    loseCount = 0;
+}
